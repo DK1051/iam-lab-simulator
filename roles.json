@@ -1,0 +1,7 @@
+{
+  "roles": {
+    "admin": ["read", "write", "delete"],
+    "analyst": ["read", "write"],
+    "guest": ["read"]
+  }
+}
