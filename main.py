@@ -2,6 +2,7 @@ import json
 import datetime
 import logging
 import bcrypt # You need this for the hashes in users.json
+import sys
 
 # --- 1. SET UP AUDIT LOGGER (Accounting) ---
 audit_logger = logging.getLogger('audit_monitor')
@@ -37,6 +38,20 @@ def authenticate(username, password, users):
     
     audit_logger.warning(f"FAILED LOGIN: Attempt with non-existent username '{username}'.")
     return None
+def security_audit(port):
+    # A+ Senior Logic: Identifying insecure protocols
+    insecure_ports = {23: "Telnet", 80: "HTTP"}
+    
+    if port in insecure_ports:
+        print(f"CRITICAL SECURITY RISK: {insecure_ports[port]} detected on port {port}!")
+        print("Shutting down to prevent unencrypted credential theft.")
+        sys.exit(1) # Exit with error code
+    else:
+        print(f"Server starting on secure port {port}...")
+
+# Example usage:
+# security_audit(80)  # This would trigger the shutdown
+security_audit(443) # This allows the app to run
 
 def authorize(role, action, roles):
     return action in roles.get(role, [])

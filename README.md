@@ -63,6 +63,10 @@ The system implements the **AAA Model** (Authentication, Authorization, Accounti
   - Timestamp
 - Maintains traceability and audit readiness
 
+### Infrastructure & Security
+- A shell-based hardening script (harden_server.sh) designed for Linux environments to secure my IAM deployment 
+- Implements an Implicit Deny policy at Layer 4, specifically blocking Port 23 and Port 80 to prevent unencrypted credential theft, while permitting Port 443 and Port 22 for secure management.
+
 ---
 
 ## Security Design Considerations
