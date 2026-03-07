@@ -24,16 +24,32 @@ def load_roles():
 def authenticate(username, password, users):
     for user in users:
         if user["username"] == username:
-            # Convert stored string hash and input password to bytes
+            # 1. Check if account is already locked 
+            if user.get("status") == "locked":
+                print(f"\nCRITICAL: Account '{username}' is LOCKED. Contact Admin.")
+                audit_logger.critical(f"BLOCK: Login attempt on LOCKED account: {username}")
+                return None
+
             stored_hash = user["password"].encode('utf-8')
             user_input = password.encode('utf-8')
             
-            # Check password against hash
             if bcrypt.checkpw(user_input, stored_hash):
+                # 2. Success: Reset failed attempts
+                user["failed_attempts"] = 0
                 audit_logger.info(f"SUCCESSFUL LOGIN: User '{username}' authenticated.")
                 return user["role"]
             else:
-                audit_logger.warning(f"FAILED LOGIN: Incorrect password for user '{username}'.")
+                # 3. Failure: Increment and check threshold 
+                user["failed_attempts"] += 1
+                attempts_left = 5 - user["failed_attempts"]
+                
+                if user["failed_attempts"] >= 5:
+                    user["status"] = "locked"
+                    audit_logger.critical(f"SECURITY ALERT: Account '{username}' LOCKED due to failures.")
+                    print(f"\nSECURITY ALERT: Too many failed attempts. Account '{username}' is LOCKED.")
+                else:
+                    audit_logger.warning(f"FAILED LOGIN: {username}. Attempts remaining: {attempts_left}")
+                    print(f"Invalid Password. {attempts_left} attempts remaining.")
                 return None
     
     audit_logger.warning(f"FAILED LOGIN: Attempt with non-existent username '{username}'.")
@@ -61,6 +77,43 @@ def log_access(username, action, result):
     with open("access.log", "a") as log:
         timestamp = datetime.datetime.now()
         log.write(f"{timestamp} | User: {username} | Action: {action} | Result: {result}\n")
+# --- SESSION COMMIT: MOVER PATCH (JML WORKFLOW) ---
+
+# --- HELPER WORKERS (Required for the Mover Patch to work) ---
+
+def revoke_legacy_permissions(username):
+    # Simulates the Principle of Least Privilege: Removing old access
+    audit_logger.info(f"LEAST PRIVILEGE: Stripping legacy permissions for {username}...")
+
+def assign_permission(username, permission, level):
+    # Simulates precise authorization
+    audit_logger.info(f"AUTHORIZATION: {username} assigned {level} for {permission}.")
+
+def log_governance_event(username, event, details):
+    # Professional Audit Logging for Identity Governance
+    audit_logger.info(f"GOVERNANCE AUDIT - {event}: {username} | {details}")
+
+
+# --- THE MOVER LOGIC (Your Code) ---
+
+def handle_mover_transition(user_id, new_department):
+    """
+    Automates the 'Mover' phase of the JML workflow.
+    """
+    # 1. THE CLEAN SLATE
+    revoke_legacy_permissions(user_id)
+    
+    # 2. THE AUTHORIZATION GRANT
+    if new_department == "IAM":
+        assign_permission(user_id, "IAM_FILE_ACCESS", level="READ-ONLY")
+        print(f"SUCCESS: {user_id} authorized for IAM Database (Read-Only).")
+        
+    # 3. LOGGING
+    log_governance_event(user_id, "ROLE_CHANGE", f"Moved to {new_department}")
+def save_users(users):
+    with open("users.json", "w") as file:
+        json.dump({"users": users}, file, indent=2)
+# --- END SESSION COMMIT ---
 
 def main():
     audit_logger.info("IAM Simulator Session Started.")
@@ -74,14 +127,29 @@ def main():
 
         password = input("Enter password: ")
         role = authenticate(username, password, users)
+        
+        # PERSISTENCE: Save the failed_attempts or locked status immediately 
+        save_users(users)
 
         if not role:
-            print("Authentication Failed. Details recorded in audit.log.")
-            log_access(username, "N/A", "Auth Failed")
+            # Removed the generic "Authentication Failed" print because 
+            # our new authenticate() function provides specific feedback.
             continue
 
         print(f"Login Successful! Your role is: {role}")
-        action = input("Enter action (read/write/delete): ")
+
+        # --- MOVER PATCH TRIGGER ---
+        # Allow admins to move users between departments
+        if role == "admin":
+            trigger_move = input("Admin: Do you need to process a 'Mover' workflow? (y/n): ")
+            if trigger_move.lower() == 'y':
+                target_user = input("Enter the username of the person moving: ")
+                new_dept = input("Enter new department (e.g., IAM): ")
+                handle_mover_transition(target_user, new_dept)
+                continue # Return to start of loop after move
+        # ---------------------------
+
+        action = input("Enter action (read/write/delete/move): ")
         
         if authorize(role, action, roles):
             print("Access Granted")
@@ -89,6 +157,5 @@ def main():
         else:
             print("Access Denied")
             log_access(username, action, "Denied")
-
 if __name__ == "__main__":
     main()

@@ -3,17 +3,23 @@
     {
       "username": "admin1",
       "password": "$2b$12$pQ8v7movP0YTydBZeqN.j.d3LtQt62u3uJAMrRPRUFSTEOkARTEKO",
-      "role": "admin"
+      "role": "admin",
+      "failed_attempts": 0,
+      "status": "active"
     },
     {
       "username": "analyst1",
       "password": "$2b$12$ylELxA/56me17zW1gNN2JenCCHsZ/7YolR7g1JKMDLYIyRLtLl78a",
-      "role": "analyst"
+      "role": "analyst",
+      "failed_attempts": 0,
+      "status": "active"
     },
     {
       "username": "guest1",
       "password": "$2b$12$D2OOeMGx061EPdJFf87jy..iD5aqU/BLREsOJUUHdXvCOgLNMeL1S",
-      "role": "guest"
+      "role": "guest",
+      "failed_attempts": 0,
+      "status": "active"
     }
   ]
 }
