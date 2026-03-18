@@ -1,7 +1,7 @@
 {
   "roles": {
-    "admin": ["read", "write", "delete"],
-    "analyst": ["read", "write"],
-    "guest": ["read"]
+    "guest": { "perms": ["read"], "inherits_from": null },
+    "analyst": { "perms": ["write"], "inherits_from": "guest" },
+    "admin": { "perms": ["delete"], "inherits_from": "analyst" }
   }
 }

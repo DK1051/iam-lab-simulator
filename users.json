@@ -1,25 +1,28 @@
 {
   "users": [
     {
+      "id": 1,
       "username": "admin1",
-      "password": "$2b$12$pQ8v7movP0YTydBZeqN.j.d3LtQt62u3uJAMrRPRUFSTEOkARTEKO",
+      "password_hash": "$2b$12$6io1FcJVpYgXQH/RmX9.XuyqqY82Owcczh4RjAaQo2wP4YkbK6zWy",
       "role": "admin",
-      "failed_attempts": 0,
-      "status": "active"
+      "status": "active",
+      "failed_attempts": 0
     },
     {
+      "id": 2,
       "username": "analyst1",
-      "password": "$2b$12$ylELxA/56me17zW1gNN2JenCCHsZ/7YolR7g1JKMDLYIyRLtLl78a",
+      "password_hash": "$2b$12$ylELxA/56me17zW1gNN2JenCCHsZ/7YolR7g1JKMDLYIyRLtLl78a",
       "role": "analyst",
-      "failed_attempts": 0,
-      "status": "active"
+      "status": "active",
+      "failed_attempts": 0
     },
     {
+      "id": 3,
       "username": "guest1",
-      "password": "$2b$12$D2OOeMGx061EPdJFf87jy..iD5aqU/BLREsOJUUHdXvCOgLNMeL1S",
+      "password_hash": "$2b$12$D2OOeMGx061EPdJFf87jy..iD5aqU/BLREsOJUUHdXvCOgLNMeL1S",
       "role": "guest",
-      "failed_attempts": 0,
-      "status": "active"
+      "status": "active",
+      "failed_attempts": 0
     }
   ]
 }
