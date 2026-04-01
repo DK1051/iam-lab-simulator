@@ -124,6 +124,31 @@ def security_audit(port):
 # security_audit(80)  # This would trigger the shutdown
 security_audit(443) # This allows the app to run
 
+def create_user(username, plain_password, role):
+    """
+    JOINER: Provisions a new identity with Least Privilege by default.
+    """
+    if not is_valid_username(username):
+        raise ValueError("Invalid username format.")
+    
+    hashed = bcrypt.hashpw(plain_password.encode(), bcrypt.gensalt()).decode()
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO users (username, password_hash, role, status, failed_attempts) VALUES (?,?,?,?,?)",
+            (username, hashed, role, "active", 0)
+        )
+        conn.commit()
+        log_governance_event(username, "JOINER", f"Provisioned with role={role}")
+        audit_logger.info(f"JOINER_ACTION: New account '{username}' created with role '{role}'.")
+        print(f"✅ User '{username}' successfully provisioned with role '{role}'.")
+    except sqlite3.IntegrityError:
+        print(f"❌ Username '{username}' already exists.")
+    finally:
+        conn.close()
+
 def unlock_user(username):
     """Resets failed attempts and sets status to active in SQLite."""
     update_user_db(username, {"failed_attempts": 0, "status": "active"})
@@ -228,8 +253,9 @@ def main():
             print("2. Unlock User Account")
             print("3. Disable Account (Leaver)")
             print("4. Skip to Application")
-            
-            choice = input("Select an administrative action (1-4): ")
+            print("5. Create New User (Joiner)")
+
+            choice = input("Select an administrative action (1-5): ")
 
             if choice == "1":
                 target_user = input("Enter username to move: ").strip().lower()
@@ -260,6 +286,12 @@ def main():
 
             elif choice == "4":
                 pass
+            elif choice == "5":
+                new_user = input("Enter new username: ").strip().lower()
+                new_pass = input("Enter temporary password: ")
+                new_role = input("Enter role (admin/analyst/guest): ").strip().lower()
+                create_user(new_user, new_pass, new_role)
+                continue
 
         action = input("Enter action (read/write/delete/move): ")
         
