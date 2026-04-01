@@ -36,12 +36,15 @@ def load_users():
     users = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return users
-
+ALLOWED_COLUMNS = {"failed_attempts", "status", "role"}
 def update_user_db(username, updates):
     """Updates specific fields in the DB using parameterized queries."""
     conn = get_db_connection()
     cursor = conn.cursor()
     for key, value in updates.items():
+        if key not in ALLOWED_COLUMNS:
+            audit_logger.critical(f"SECURITY: Blocked unauthorized column update: {key}")
+            raise ValueError(f"Unauthorized column: {key}")
         # Using ? placeholders to prevent SQL Injection
         cursor.execute(f"UPDATE users SET {key} = ? WHERE username = ?", (value, username))
     conn.commit()
@@ -196,7 +199,6 @@ def main():
 
     while True:
         # 1. Capture the username
-        users = load_users()
         username = input("\nEnter username (or type exit): ").strip().lower()
         if username == "exit":
             break

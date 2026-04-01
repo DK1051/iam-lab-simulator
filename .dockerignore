@@ -4,5 +4,4 @@ __pycache__/
 .DS_Store
 users.json
 users.json.bak
-migrate.py
 audit.log
