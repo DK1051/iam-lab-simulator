@@ -34,10 +34,48 @@ The simulator handles the core phases of a user's lifecycle within an organizati
 ## 📦 Installation & Setup
 
 1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/YOUR_USERNAME/iam-lab-simulator.git](https://github.com/YOUR_USERNAME/iam-lab-simulator.git)
+```bash
+   git clone https://github.com/DK1051/iam-lab-simulator.git
    cd iam-lab-simulator
+```
 
+2. **Create and activate a virtual environment:**
+```bash
+   python -m venv venv
+   source venv/bin/activate      # Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies:**
+```bash
+   pip install -r requirements.txt
+```
+
+4. **Set up the database:**
+```bash
+   python migrate.py
+```
+
+5. **Run the application:**
+```bash
+   python main.py
+```
+
+## 🐳 Running with Docker
+```bash
+   docker build -t iam-lab .
+   docker run -it iam-lab
+```
+
+## 📊 SOC Dashboard
+```bash
+   streamlit run dashboard.py
+```
+   Access the dashboard at `http://localhost:8501`. Admin password required.
+
+## 🔐 Threat Model
+See [THREAT_MODEL.md](THREAT_MODEL.md) for a full breakdown of attacks defended against, known limitations, and production scaling considerations.
 
 ## 👤 Author
-**Eojin Kim** *Focus: Identity & Access Management (IAM) and Security Operations.*
+**Eojin Kim** — *Focus: Identity & Access Management (IAM) and Security Operations.*
+
+

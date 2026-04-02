@@ -197,24 +197,34 @@ def log_governance_event(username, event, details):
     # Professional Audit Logging for Identity Governance
     audit_logger.info(f"GOVERNANCE AUDIT - {event}: {username} | {details}")
 
+DEPARTMENT_PERMISSIONS = {
+    "IAM":     ("IAM_FILE_ACCESS",     "READ-ONLY"),
+    "HR":      ("HR_RECORDS_ACCESS",   "READ-WRITE"),
+    "Finance": ("FINANCE_DB_ACCESS",   "READ-ONLY"),
+    "IT":      ("INFRA_MGMT_ACCESS",   "READ-WRITE"),
+}
 
 # --- THE MOVER LOGIC (Your Code) ---
 
 def handle_mover_transition(user_id, new_department):
     """
     Automates the 'Mover' phase of the JML workflow.
+    Supports all departments via permission map.
     """
     # 1. THE CLEAN SLATE
     revoke_legacy_permissions(user_id)
-    
+
     # 2. THE AUTHORIZATION GRANT
-    if new_department == "IAM":
-        assign_permission(user_id, "IAM_FILE_ACCESS", level="READ-ONLY")
-        print(f"SUCCESS: {user_id} authorized for IAM Database (Read-Only).")
-        
+    perm = DEPARTMENT_PERMISSIONS.get(new_department)
+    if perm:
+        assign_permission(user_id, perm[0], level=perm[1])
+        print(f"SUCCESS: {user_id} authorized for {new_department} ({perm[1]}).")
+    else:
+        audit_logger.warning(f"MOVER_WARNING: Unknown dept '{new_department}' for {user_id}.")
+        print(f"⚠️  Warning: No permissions defined for department '{new_department}'.")
+
     # 3. LOGGING
     log_governance_event(user_id, "ROLE_CHANGE", f"Moved to {new_department}")
-
 # --- END SESSION COMMIT ---
 
 def main():
